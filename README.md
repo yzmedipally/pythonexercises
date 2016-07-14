@@ -23,7 +23,7 @@ The original idea stemmed from a TUM course (IN 2085) and a related [github proj
 
 1. The instructor generates the overall structure of the exercises:
   * Each gitlab group corresponds to an exercise group (one or more students). The name of the exercise group should include a reference to the course, the semester and an identifier inside this namespace (e.g. increasing integers).
-  * Each student has logged in at least once in gitlab (therefore his or her account exists). The instructor can know connect the student's account with an exercise group.
+  * Each student has logged in at least once in gitlab (therefore his or her account exists). The instructor can now connect the student's account with an exercise group.
   * Each gitlab project inside an exercise group corresponds to an exercise. An exercise has a due date and an instructor or reviewer to correct the solution provided by the student. These things are realized by commits (solutions) and the timestamp of the commit (due date).
 2. The instructor can "publish" the exercises weekwise or once for all. This means that in each exercise group an project including the accodording file structure is committed.
 3. The students pull/fork the exercise and push/merge their solution back to the according project in the according exercise group.
