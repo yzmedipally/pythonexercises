@@ -11,13 +11,13 @@ The original idea stemmed from a TUM course (IN 2085) and a related [github proj
 
 ## Domain
 
-| course          | gitlab           |
-|-----------------|------------------|
-| instructor      | owner            |
-| reviewer        | reviewer         |
-| student         | developer        |
-| exercise        | project          |
-| exercise group  | group/namespace  |
+| course          | gitlab             |
+|-----------------|--------------------|
+| instructor      | owner/master       |
+| reviewer        | developer/reporter |
+| student         | developer          |
+| exercise        | project            |
+| exercise group  | group/namespace    |
 
 ## Workflow
 
@@ -38,6 +38,7 @@ tba
 
 The functionality could be realized by using the [gitlab api](http://docs.gitlab.com/ce/api) and a scripting language (something that runs on Linux, OSX and Win-OS).
 
-## Wishlist
+## Wishlist/Open Issues
 * Automatic checking of plagiarisms (hashsums of binary files, etc.)?
 * Using issues and/or milestones for the exercises?
+* Identifying students, reviewers and instructors via gitlab api & emailadresses (or something else)?
