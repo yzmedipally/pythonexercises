@@ -32,7 +32,23 @@ The original idea stemmed from a TUM course (IN 2085) and a related [github proj
 
 ## Usage
 
-tba
+```bash
+# Creates exercise groups named "IN2085\_WS1617\_00", "IN2085\_WS1617\_01", ..., "IN2085\_WS1617\_19"
+exercises $TOKEN create-group --pattern "IN2085\_WS1617\_" --number 20 --starts 0
+
+# Assigns Student to a exercise group
+exercises $TOKEN assign-student-to-group --student "Student-Identifier" --group "IN2085\_WS1617\_01"
+
+# Creates an exercise in a "namespace"
+exercises $TOKEN create-exercise --pattern "IN2085\_WS1617\_" --number 20 --template "Template-Identifier"
+
+# Checks out the solutions for the reviewer
+exercises $TOKEN get-solutions --pattern "IN2085\_WS1617\_" --exercise "Exercise-Identifier"
+
+# Deprovisions a whole course
+exercises $TOKEN remove-course --pattern "IN2085\_WS1617\_" --number 20
+
+```
 
 ## Techstuff
 
