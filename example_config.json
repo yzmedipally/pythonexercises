@@ -1,0 +1,21 @@
+{
+    "url": "<url>",
+    "token": "<url>",
+    "pattern": "<pattern>",
+    "downloadDir": "<download_dir>", 
+    "adminMails": [
+        "instructor1@example.org",
+        "instructor2@example.org"
+    ],
+    "students": { 
+        "1": [
+            "student1@example.org",
+            "student2@example.org"
+        ],
+        "2": [
+            "student3@example.org",
+            "student4@example.org",
+            "student5@example.org"
+        ]
+    }
+} 
