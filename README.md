@@ -11,20 +11,20 @@ The original idea stemmed from a TUM course (IN 2085) and a related [github proj
 ./exercises.py --config <path_to_config_file> --action check 
 
 # Initializes the project (can also be used to update gitlab to an updated config file)
-# this defines who is admin, i.e. first call no special rights needed, after that admin rights
+# this defines who is instructor, i.e. first call no special rights needed, after that instructor rights
 ./exercises.py --config <path_to_config_file> --action init
 
 # Publishes an exercise in a "namespace"
-# admin rights needed
+# instructor rights needed
 # tba:
 ./exercises.py --config <path_to_config_file> --action publish --exercise exerciseID 
 
 # Checks out the solutions for the reviewer 
-# token must at least have REPORTER rights 
+# token must at least have reviewer rights 
 ./exercises.py --config <path_to_config_file> --action download --exercise exerciseID 
 
 # Deprovisions a whole course
-# admin rights needed
+# instructor rights needed
 ./exercises.py --config <path_to_config_file> --action delete --exercise exerciseID 
 
 ``` 
