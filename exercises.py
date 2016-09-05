@@ -1,60 +1,75 @@
 #!/usr/bin/env python 
 import argparse
-import requests
 import json
-import pprint
+from pprint import pprint
+from actions import *
+import sys
 
-def further_arg_checking( ):
-    "This checks the given cli-args depending on the given action"
-    if args.action == "create-groups" or "remove-course":
-        if not args.pattern:
-            parser.error('--pattern has to be given if action is' +  args.action)
-    if args.action == "create-groups":
-        if not args.number: 
-            parser.error('--number has to be given if action is' +  args.action)
-    return
+parser = argparse.ArgumentParser(
+        description = 'Exercises - Script to automate gitlab course handling.')
+parser.add_argument(    '--config_file',    
+                        default = 'config.json', 
+                        required = False, 
+                        help = 'Path to config file')
+parser.add_argument(    '--action',
+                        default = 'check',
+                        required = False,
+                        help = """The action to be executed. Possible values:
+                        check, init, publish, download, delete""")
 
-def parse_search_req(json, parse_for):
-    for item in json:
-        yield(item[parse_for])
-
-def send_request_to_gitlab( ):
-    "This encapsulates the requests sent to gitlab" 
-    if args.action == "create-groups":
-        resp = requests.post('https://gitlab.lrz.de/api/v3/groups?name=' + args.pattern + '&path=' + args.pattern, headers={'PRIVATE-TOKEN':args.token}) 
-    if args.action == "remove-course":
-        resp = requests.get('https://gitlab.lrz.de/api/v3/groups?search=' + args.pattern, headers={'PRIVATE-TOKEN':args.token}) 
-        ids = parse_search_req(resp.json(), "id")
-        print(ids)
-#        resp = requests.delete('https://gitlab.lrz.de/api/v3/projects/' + args.pattern, headers={'PRIVATE-TOKEN':args.token})  
-    else:
-        print("Unknown action")
-
-    pp = pprint.PrettyPrinter(indent=4)
-    pp.pprint(resp)
-
-    if resp.status_code != 200: 
-        print(resp)
-
-    print json.dumps(resp.json(), indent=2, sort_keys=True)
-
-parser = argparse.ArgumentParser(description = 'Exercises - Script to automate gitlab course handling.')
-parser.add_argument('token',
-        help = 'gitlab Auth-Token')
-parser.add_argument('action',
-        help = 'The action to be executed. Possible values: create-group, get-solutions...')
-parser.add_argument('--pattern',
-        help = 'Pattern for exercise groups (will be extended with numerical IDs)')            
-parser.add_argument('--number',
-        help = 'Number of exercise groups (will be extended with numerical IDs)')            
 args = parser.parse_args()
 
-further_arg_checking()
+def check_config(config):
+    configOk = True
+    for key in [ "url", "token", "pattern" ]:
+        if not key in config:
+            print "Config-key %s is not set!" % key
+            configOk = False
+        elif key == "pattern":
+            if len(config["pattern"]) < 4:
+                print "Pattern %s is to short (at least 4 chars!)" % \
+                    config["pattern"]
+                configOk = False
+    return configOk
 
-send_request_to_gitlab()
+def check_args(action, args):
+    if action == "publish" or action == "download":
+        if not "exercise" in args:
+            raise ValueError("Action %s needs param --exercise!" % action)
 
-# Determine action
+def dispatch_action(action):
+    try:
+        with open(args.config_file) as config_file:
+            config = json.load(config_file)
+        config_file.close()
+    except IOError as e:
+        print "I/O error({0}): {1}".format(e.errno, e.strerror)
+        sys.exit(1) 
+    if not check_config(config):
+        print "Config check failed"
+        sys.exit(2)
+    gl = gitlab.Gitlab(config["url"], config["token"]) 
+    if action == "check":
+        check_action(gl, config)
+    elif action == "init":
+        init_action(gl, config)
+    elif action == "publish": 
+        try:
+            check_args("publish", args)
+        except ValueError as e:
+            print str(e)
+            return 3
+        publish_action(gl)
+    elif action == "download":
+        try:
+            check_args("download", args)
+        except ValueError as e:
+            print str(e)
+            return 3
+        download_action(gl)
+    elif action == "delete":
+        delete_action(gl)
+    else:
+        print "Action %s unknown (try --help)" % action
 
-#resp = requests.get('https://gitlab.lrz.de/api/v3/projects', headers={'PRIVATE-TOKEN':args.token})
-#for project in resp.json():
-#    print('{} {}' . format(project['name'], project['owner']['name']))
+dispatch_action(args.action.lower())
