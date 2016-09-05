@@ -29,6 +29,10 @@ The original idea stemmed from a TUM course (IN 2085) and a related [github proj
 
 ``` 
 
+## Configuration
+
+Please consult example the [configuration file](https://gitlab.lrz.de/giteducated/exercises/blob/master/example_config.json)
+
 ## Installation & Requirements
 
 tba
