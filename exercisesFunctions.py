@@ -174,6 +174,8 @@ def add_reviewer_to_group(gl, reviewerMail, groupID):
     _add_users_to_group(gl, [reviewerID], groupID, gitlab.REPORTER_ACCESS)
 
 def publish_exercise(gl, exercise, groupPattern):
+    # see https://gitlab.com/gitlab-org/gitlab-ce/merge_requests/6213
+    # until this is merged and released this functionality is not available...
     raise NotImplementedError
     try:
         masterProject = gl.projects.get(masterID)
@@ -182,7 +184,7 @@ def publish_exercise(gl, exercise, groupPattern):
         print "Could not retrieve Master-Project %s or GroupIDs for %s" % exercise, groupPattern
     try:
         for id in groupIDs:
-            fork = masterProject.forks.create({})
+            fork = masterProject.forks.create({'namespace_id': id})
     except gitlab.exceptions.GitlabCreateError:
         print "Could not fork to groups"
 
