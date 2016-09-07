@@ -1,4 +1,6 @@
+import os
 import gitlab 
+from git import Repo 
 
 _groupIDLength = 5
 ################################################################################
@@ -84,6 +86,16 @@ def _add_students_to_group(gl, studentMailAdresses, groupID):
     for ma in studentMailAdresses:
         studentIDs.append(_get_user_id_by_mail(gl, ma))
     _add_users_to_group(gl, studentIDs, groupID, gitlab.DEVELOPER_ACCESS) 
+
+def _get_last_solution(repo, branch, dueDate):
+    cur_solution = 0
+    for commit in repo.iter_commits(branch): 
+        if cur_solution == 0:
+            cur_solution = commit.hexsha 
+        if commit.committed_date <= dueDate and commit.committed_date > cur_solution:
+            cur_solution = commit.hexsha
+    return cur_solution
+
 ################################################################################
 # PUBLIC INTERFACE 
 ################################################################################
@@ -165,13 +177,40 @@ def init_groups(gl, mapping, pattern, adminMails = []):
             except ValueError as e:
                 print str(e)
 
+def _add_user_to_project(gl, userID, projectName, accessLevel, groupID): 
+    group = gl.groups.get(groupID)
+    if projectName in map(lambda x: x.name, group.projects.list()):
+        if len(group.projects.list(search = projectName)) > 1:
+            raise ValueError("Search for %s returns more than one project in %s" % \
+                (projectName, group.name))
+        projectInGroup = group.projects.list(search = projectName)[0]
+        project = gl.projects.get(projectInGroup.id)
+        if not userID in map(lambda x: x.id, project.members.list()):
+            project.members.create(
+                {
+                    'user_id': userID,
+                    'access_level': accessLevel 
+                }
+            )
+        # else: nothing to do
+    else:
+        raise ValueError("No project with name %s in group %s" % \
+            (projectName, group.name))
+
 ########################################
 # workflow
 ########################################
-def add_reviewer_to_group(gl, reviewerMail, groupID):
-    raise NotImplementedError
-    reviewerID = _get_user_id_by_mail(gl, reviewerMail)
-    _add_users_to_group(gl, [reviewerID], groupID, gitlab.REPORTER_ACCESS)
+def add_reviewer_to_exercise(gl, reviewerMails, pattern, exercise):
+    for reviewerMail in reviewerMails: 
+        reviewerID = _get_user_id_by_mail(gl, reviewerMail)
+        for groupID in _get_group_ids_from_pattern(gl, pattern):
+            _add_user_to_project(
+                gl, 
+                reviewerID,
+                exercise,
+                gitlab.REPORTER_ACCESS,
+                groupID
+            )
 
 def publish_exercise(gl, exercise, groupPattern):
     # see https://gitlab.com/gitlab-org/gitlab-ce/merge_requests/6213
@@ -188,8 +227,39 @@ def publish_exercise(gl, exercise, groupPattern):
     except gitlab.exceptions.GitlabCreateError:
         print "Could not fork to groups"
 
-def download_solutions(exercise, groupPattern, downloadDir): 
-    raise NotImplementedError
+def download_solutions(gl, exercise, pattern, downloadDir, dueDate): 
+    # create directory for solutions if not existing
+    if not os.path.exists(downloadDir):
+            os.makedirs(downloadDir)
+    for groupID in _get_group_ids_from_pattern(gl, pattern):
+        group = gl.groups.get(groupID) 
+        if exercise in map(lambda x: x.name, group.projects.list()): 
+            project = group.projects.list(search = exercise)[0]
+            curSolutionPath = os.path.join(downloadDir, exercise, group.name)
+            try:
+                if os.path.exists(curSolutionPath):
+                    repo = Repo(curSolutionPath)
+                    origin = repo.remotes.origin
+                    origin.pull()
+                else:
+                    print "Downloading %s" % project.http_url_to_repo
+                    repo = Repo.clone_from(
+                        project.http_url_to_repo, 
+                        curSolutionPath, 
+                        branch='master') 
+                solutionHash = _get_last_solution(repo, 'master', dueDate)
+                if solutionHash == 0:
+                    # should not happen since publish action was a commit
+                    print "group %s does not have a solution!" % group.name
+                correct_branch = repo.create_head('correct_branch')
+                correct_branch.set_commit(solutionHash) 
+            except Exception as e:
+                print "Can't download exercise %s for group %s to %s: %s" % \
+                        (exercise, group.name, curSolutionPath, str(e))
+                continue
+        else:
+            print "Can't clone/fetch exercise %s for group %s (does not exist)" % \
+                    (exercise, group.name)
 
 ########################################
 # deprov

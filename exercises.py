@@ -3,6 +3,7 @@ import argparse
 import json
 import sys
 from exercisesFunctions import *
+from pprint import pprint
 
 def check_config(config):
     configOk = True
@@ -17,10 +18,16 @@ def check_config(config):
                 configOk = False
     return configOk
 
-def check_args(action, args):
-    if action == "publish" or action == "download":
-        if not "exercise" in args:
-            raise ValueError("Action %s needs param --exercise!" % action)
+def check_args(args):
+    if args.action in ["publish", "download", "add_reviewer"]:
+        if not "exercise" in args or args.exercise == None:
+            raise ValueError("Action %s needs param --exercise!" % args.action)
+    if args.action == "download":
+        if not "duedate" in args or args.duedate == None:
+            raise ValueError("Action %s needs param --duedate!" % args.action)
+    if args.action == "add_reviewer":
+        if not "reviewer" in args or args.reviewer == None:
+            raise ValueError("Action %s needs param --reviewer!" % args.action)
 
 def check_action(gl, config):
     if check_users(gl, config["students"]):
@@ -45,37 +52,46 @@ def init_action(gl, config):
     except ValueError as e:
         pprint(e)
 
-def publish_action(gl):
+def publish_action(gl, reviewerString, pattern, exercise): 
     raise NotImplementedError
 
-def download_action(gl):
-    raise NotImplementedError
+def dispatch_action(args, config):
+    try:
+        check_args(args)
+    except ValueError as e:
+        print str(e)
+        sys.exit(3)
 
-def delete_action(gl):
-    delete_groups(gl, config["pattern"]) 
+    gl = gitlab.Gitlab(config["url"], config["token"])
+    action = args.action.lower()
 
-def dispatch_action(action, config):
-    gl = gitlab.Gitlab(config["url"], config["token"]) 
-    if action == "check":
+    if   action == "check":
         check_action(gl, config)
+
     elif action == "init":
         init_action(gl, config)
+
     elif action == "publish": 
-        try:
-            check_args("publish", args)
-        except ValueError as e:
-            print str(e)
-            return 3
         publish_action(gl)
+
+    elif action == "add_reviewer":
+        add_reviewer_to_exercise(
+            gl,
+            args.reviewer.split(","),
+            config["pattern"],
+            args.exercise
+        )
+
     elif action == "download":
-        try:
-            check_args("download", args)
-        except ValueError as e:
-            print str(e)
-            return 3
-        download_action(gl)
+        download_solutions(gl,
+            args.exercise,
+            config["pattern"],
+            config["downloadDir"],
+            args.duedate)
+
     elif action == "delete":
-        delete_action(gl)
+        delete_groups(gl, config["pattern"]) 
+
     else:
         print "Action %s unknown (try --help)" % action
 
@@ -90,7 +106,20 @@ def main():
                             default = 'check',
                             required = False,
                             help = """The action to be executed. Possible values:
-                            check, init, publish, download, delete""")
+                            check, init, publish, add_reviewer, download, delete""")
+    parser.add_argument(    '--exercise',
+                            required = False,
+                            help = """The name of the exercise (i.e. the project in gitlab.
+                            Required for action publish and download""")
+    parser.add_argument(    '--duedate',
+                            required = False,
+                            help = """The duedate of the exercise. Only used with action download. 
+                            at the moment only unixtimestamps are supported""")
+    parser.add_argument(    '--reviewer',
+                            required = False,
+                            help = """Comma separated list of mail addresses of reviewers 
+                            for the exercise. Only used with action add_reviewer (or publish?).""")
+
     args = parser.parse_args()
     try:
         with open(args.config_file) as config_file:
@@ -102,7 +131,7 @@ def main():
     if not check_config(config):
         print "Config check failed"
         sys.exit(2)
-    dispatch_action(args.action.lower(), config)
+    dispatch_action(args, config)
 
 if __name__ == "__main__":
     main()
