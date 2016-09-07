@@ -17,15 +17,18 @@ The original idea stemmed from a TUM course (IN 2085) and a related [github proj
 # Publishes an exercise in a "namespace"
 # instructor rights needed
 # tba:
-./exercises.py --config <path_to_config_file> --action publish --exercise exerciseID 
+./exercises.py --config <path_to_config_file> --action publish --exercise <exercise>
+
+# Adds a reviewer to an exercise
+./exercises.py --config <path_to_config_file> --action add_reviewer --exercise <exercise>
 
 # Checks out the solutions for the reviewer 
 # token must at least have reviewer rights 
-./exercises.py --config <path_to_config_file> --action download --exercise exerciseID 
+./exercises.py --config <path_to_config_file> --action download --exercise <exercise> --duedate <unixtimestamp>
 
 # Deprovisions a whole course
 # instructor rights needed
-./exercises.py --config <path_to_config_file> --action delete --exercise exerciseID 
+./exercises.py --config <path_to_config_file> --action delete --exercise <exercise>
 
 ``` 
 
