@@ -37,7 +37,11 @@ def check_action(gl, config):
     if check_groups(gl, config["students"], config["pattern"]):
         print "Groups okay!" 
     else:
-        print "Groups not okay"
+        print "Groups not okay!"
+    if check_master_group(gl, config["masterGroup"]):
+        print "Master-Group okay!"
+    else:
+        print "Master-Group not okay!"
 
 def init_action(gl, config):
     if not "adminMails" in config:

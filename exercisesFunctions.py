@@ -137,6 +137,12 @@ def check_groups(gl, mapping, pattern):
             print "Group %s does not exist!" % groupName
     return groupsOk
 
+def check_master_group(gl, masterGroup):
+    if not _gitlab_entity_exists(gl, 'group', masterGroup):
+        print "Master group %s does not exist!" % masterGroup
+        return False
+    return True
+
 ########################################
 # init
 ########################################
@@ -212,12 +218,13 @@ def add_reviewer_to_exercise(gl, reviewerMails, pattern, exercise):
                 groupID
             )
 
-def publish_exercise(gl, exercise, groupPattern):
+def publish_exercise(gl, exercise, masterGroupName, groupPattern):
     # see https://gitlab.com/gitlab-org/gitlab-ce/merge_requests/6213
     # until this is merged and released this functionality is not available...
     raise NotImplementedError
     try:
-        masterProject = gl.projects.get(masterID)
+        masterGroup = gl.groups.get(masterGroupName)
+        masterProject = masterGroup.projects.list(search = exercise)[0]
         groupIDs = _get_group_ids_from_pattern(gl, pattern)
     except gitlab.exceptions.GitlabGetError:
         print "Could not retrieve Master-Project %s or GroupIDs for %s" % exercise, groupPattern
