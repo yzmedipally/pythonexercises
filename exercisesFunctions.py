@@ -224,13 +224,17 @@ def add_reviewer_to_exercise(gl, reviewerMails, pattern, exercise):
     for reviewerMail in reviewerMails: 
         reviewerID = _get_user_id_by_mail(gl, reviewerMail)
         for groupID in _get_group_ids_from_pattern(gl, pattern):
-            _add_user_to_project(
-                gl, 
-                reviewerID,
-                exercise,
-                gitlab.REPORTER_ACCESS,
-                groupID
-            )
+            try:
+                _add_user_to_project(
+                    gl,
+                    reviewerID,
+                    exercise,
+                    gitlab.REPORTER_ACCESS,
+                    groupID
+                )
+            except ValueError as e:
+                print "ERROR: Couldn't add %s (Error: %s)" % \
+                    (reviewerMail, str(e))
 
 def publish_exercise(gl, exercise, masterGroupName, groupPattern):
     # see https://gitlab.com/gitlab-org/gitlab-ce/merge_requests/6213
