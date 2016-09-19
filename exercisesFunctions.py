@@ -1,4 +1,5 @@
 import os
+import sys
 import gitlab 
 from git import Repo 
 import shutil
@@ -110,8 +111,42 @@ def _get_commithash_of_original_exercise(gl, masterProject, downloadDir, exercis
         origin.pull()
     return repo.active_branch.commit
 
-################################################################################
-# PUBLIC INTERFACE 
+def query_yes_no(question, default="yes"):
+    """Ask a yes/no question via raw_input() and return their answer.
+
+    "question" is a string that is presented to the user.
+    "default" is the presumed answer if the user just hits <Enter>.
+        It must be "yes" (the default), "no" or None (meaning
+        an answer is required of the user).
+
+    The "answer" return value is True for "yes" or False for "no".
+
+    from http://stackoverflow.com/questions/3041986/apt-command-line-interface-like-yes-no-input
+
+    """
+    valid = {"yes": True, "y": True, "ye": True,
+             "no": False, "n": False}
+    if default is None:
+        prompt = " [y/n] "
+    elif default == "yes":
+        prompt = " [Y/n] "
+    elif default == "no":
+        prompt = " [y/N] "
+    else:
+        raise ValueError("invalid default answer: '%s'" % default)
+
+    while True:
+        sys.stdout.write(question + prompt)
+        choice = raw_input().lower()
+        if default is not None and choice == '':
+            return valid[default]
+        elif choice in valid:
+            return valid[choice]
+        else:
+            sys.stdout.write("Please respond with 'yes' or 'no' "
+                             "(or 'y' or 'n').\n")
+
+# PUBLIy INTERFACE 
 ################################################################################
 
 ########################################
@@ -297,7 +332,11 @@ def delete_groups(gl, pattern):
     if not len(pattern) > 4:
         print "The string pattern %s is smaller than four chars!" % pattern
         return False
-    for groupID in _get_group_ids_from_pattern(gl, pattern):
-        print "Deleting Group with ID %s" % groupID
-        gl.groups.delete(groupID)
-    return True
+    if query_yes_no("Do you really want to delete all student's groups?", "no"): 
+        for groupID in _get_group_ids_from_pattern(gl, pattern):
+            print "Deleting Group with ID %s" % groupID
+#            gl.groups.delete(groupID)
+        return True
+    else:
+        print "Aborting"
+        return False
