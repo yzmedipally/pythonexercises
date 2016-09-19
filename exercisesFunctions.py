@@ -244,7 +244,7 @@ def download_solutions(gl, exercise, pattern, downloadDir, dueDate):
                 else:
                     print "Downloading %s" % project.http_url_to_repo
                     repo = Repo.clone_from(
-                        project.http_url_to_repo, 
+                        project.ssh_url_to_repo,
                         curSolutionPath, 
                         branch='master') 
                 solutionHash = _get_last_solution(repo, 'master', dueDate)
