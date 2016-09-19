@@ -51,6 +51,7 @@ def init_action(gl, config):
         ) 
     except ValueError as e:
         pprint(e)
+    print "Successfully created project with config-file"
 
 def publish_action(gl, reviewerString, pattern, exercise): 
     raise NotImplementedError
