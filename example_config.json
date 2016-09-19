@@ -3,6 +3,7 @@
     "token": "<url>",
     "pattern": "<pattern>",
     "downloadDir": "<download_dir>", 
+    "masterGroup": "<master_group>", 
     "adminMails": [
         "instructor1@example.org",
         "instructor2@example.org"

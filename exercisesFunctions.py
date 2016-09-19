@@ -1,6 +1,7 @@
 import os
 import gitlab 
 from git import Repo 
+import shutil
 
 _groupIDLength = 5
 ################################################################################
@@ -95,6 +96,19 @@ def _get_last_solution(repo, branch, dueDate):
         if commit.committed_date <= dueDate and commit.committed_date > cur_solution:
             cur_solution = commit.hexsha
     return cur_solution
+
+def _get_commithash_of_original_exercise(gl, masterProject, downloadDir, exercise):
+    masterRepoPath = os.path.join(downloadDir, exercise, group.name)
+    if not os.path.exists(masterRepoPath):
+        repo = Repo.clone_from(
+            masterProject.ssh_url_to_repo,
+            masterRepoPath,
+            branch='master')
+    else:
+        repo = Repo(masterRepoPath)
+        origin = repo.remotes.origin
+        origin.pull()
+    return repo.active_branch.commit
 
 ################################################################################
 # PUBLIC INTERFACE 
@@ -234,10 +248,13 @@ def publish_exercise(gl, exercise, masterGroupName, groupPattern):
     except gitlab.exceptions.GitlabCreateError:
         print "Could not fork to groups"
 
-def download_solutions(gl, exercise, pattern, downloadDir, dueDate): 
+def download_solutions(gl, exercise, pattern, downloadDir, dueDate, masterGroupName): 
     # create directory for solutions if not existing
     if not os.path.exists(downloadDir):
             os.makedirs(downloadDir)
+    masterGroup = gl.groups.get(masterGroupName)
+    masterProject = masterGroup.projects.list(search = exercise)[0]
+    originalHash = _get_commithash_of_original_exercise(gl, masterProject, downloadDir, exercise)
     for groupID in _get_group_ids_from_pattern(gl, pattern):
         group = gl.groups.get(groupID) 
         if exercise in map(lambda x: x.name, group.projects.list()): 
@@ -255,9 +272,10 @@ def download_solutions(gl, exercise, pattern, downloadDir, dueDate):
                         curSolutionPath, 
                         branch='master') 
                 solutionHash = _get_last_solution(repo, 'master', dueDate)
-                if solutionHash == 0:
-                    # should not happen since publish action was a commit
-                    print "group %s does not have a solution!" % group.name
+                if solutionHash != originalHash:
+                    print "group %s does not have a solution (identical to master)!" % group.name
+                    shutil.rmtree(curSolutionPath)
+                    continue
                 correct_branch = repo.create_head('correct_branch')
                 correct_branch.set_commit(solutionHash) 
             except Exception as e:

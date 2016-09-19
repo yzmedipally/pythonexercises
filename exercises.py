@@ -92,7 +92,8 @@ def dispatch_action(args, config):
             args.exercise,
             config["pattern"],
             config["downloadDir"],
-            args.duedate)
+            args.duedate,
+            config["masterGroup"])
 
     elif action == "delete":
         delete_groups(gl, config["pattern"]) 
