@@ -132,7 +132,7 @@ def main():
             config = json.load(config_file)
         config_file.close()
     except IOError as e:
-        print "I/O error({0}): {1}".format(e.errno, e.strerror)
+        print "Couldn't open {0}: I/O error({1}) - {2}".format(args.config_file, e.errno, e.strerror)
         sys.exit(1) 
     if not check_config(config):
         print "Config check failed"
