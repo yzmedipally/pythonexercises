@@ -3,6 +3,8 @@ import sys
 import gitlab 
 from git import Repo 
 import shutil
+from pprint import pprint
+import requests
 
 _groupIDLength = 5
 ################################################################################
@@ -99,7 +101,7 @@ def _get_last_solution(repo, branch, dueDate):
     return cur_solution
 
 def _get_commithash_of_original_exercise(gl, masterProject, downloadDir, exercise):
-    masterRepoPath = os.path.join(downloadDir, exercise, group.name)
+    masterRepoPath = os.path.join(downloadDir, exercise, "master")
     if not os.path.exists(masterRepoPath):
         repo = Repo.clone_from(
             masterProject.ssh_url_to_repo,
@@ -271,23 +273,26 @@ def add_reviewer_to_exercise(gl, reviewerMails, pattern, exercise):
                 print "ERROR: Couldn't add %s (Error: %s)" % \
                     (reviewerMail, str(e))
 
-def publish_exercise(gl, exercise, masterGroupName, pattern):
+def publish_exercise(gl, exercise, masterGroupName, pattern, config):
     try:
         masterGroup = gl.groups.get(masterGroupName)
         if len (masterGroup.projects.list(search = exercise)) != 1:
             raise ValueError("Exercise is not unambiguos!")
-        masterProject = masterGroup.projects.list(search = exercise)[0]
+        masterProjectID = masterGroup.projects.list(search = exercise)[0].id
+        masterProject = gl.projects.get(masterProjectID)
         groupIDs = _get_group_ids_from_pattern(gl, pattern)
     except(gitlab.exceptions.GitlabGetError, ValueError) as e:
         print "Could not retrieve Master-Project %s or GroupIDs for %s" % (exercise, pattern)
         return
     try:
         for id in groupIDs:
-            group = gl.groups.get(id)
-            # by hand: curl --header "PRIVATE-TOKEN: aV4F1jNivUYVEqQ83YsZ" "https://gitlab.lrz.de/api/v3/projects/fork/4846?namespace=3585"
-            gl.projects.fork({'id': masterProject.id, 'namespace': group.name})
-    except gitlab.exceptions.GitlabCreateError:
-        print "Could not fork to groups"
+            # by hand: curl --request POST --header "PRIVATE-TOKEN: <TOKEN>" "https://gitlab.lrz.de/api/v3/projects/fork/masterPoject.id?namespace=id"
+            fork_url = config["url"] + "/api/v3/projects/fork/%s?namespace=%s" % (masterProject.id, id)
+            r = requests.post(
+                    fork_url,
+                    headers={'PRIVATE-TOKEN' : config["token"]})
+    except gitlab.exceptions.GitlabCreateError as e:
+        pprint(e)
 
 def download_solutions(gl, exercise, pattern, downloadDir, dueDate, masterGroupName): 
     # create directory for solutions if not existing
@@ -313,12 +318,13 @@ def download_solutions(gl, exercise, pattern, downloadDir, dueDate, masterGroupN
                         curSolutionPath, 
                         branch='master') 
                 solutionHash = _get_last_solution(repo, 'master', dueDate)
-                if solutionHash != originalHash:
+                if solutionHash == originalHash:
                     print "group %s does not have a solution (identical to master)!" % group.name
                     shutil.rmtree(curSolutionPath)
                     continue
                 correct_branch = repo.create_head('correct_branch')
                 correct_branch.set_commit(solutionHash) 
+                print "Solution for group %s is available at %s" % (group.name, curSolutionPath) 
             except Exception as e:
                 print "Can't download exercise %s for group %s to %s: %s" % \
                         (exercise, group.name, curSolutionPath, str(e))

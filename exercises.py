@@ -74,7 +74,7 @@ def dispatch(args, config):
         init_action(gl, config)
 
     elif action == "publish":
-        publish_exercise(gl, args.exercise, config["masterGroup"], config["pattern"])
+        publish_exercise(gl, args.exercise, config["masterGroup"], config["pattern"], config)
 
     elif action == "add_reviewer":
         add_reviewer_to_exercise(
