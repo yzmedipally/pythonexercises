@@ -271,19 +271,21 @@ def add_reviewer_to_exercise(gl, reviewerMails, pattern, exercise):
                 print "ERROR: Couldn't add %s (Error: %s)" % \
                     (reviewerMail, str(e))
 
-def publish_exercise(gl, exercise, masterGroupName, groupPattern):
-    # see https://gitlab.com/gitlab-org/gitlab-ce/merge_requests/6213
-    # until this is merged and released this functionality is not available...
-    raise NotImplementedError
+def publish_exercise(gl, exercise, masterGroupName, pattern):
     try:
         masterGroup = gl.groups.get(masterGroupName)
+        if len (masterGroup.projects.list(search = exercise)) != 1:
+            raise ValueError("Exercise is not unambiguos!")
         masterProject = masterGroup.projects.list(search = exercise)[0]
         groupIDs = _get_group_ids_from_pattern(gl, pattern)
-    except gitlab.exceptions.GitlabGetError:
-        print "Could not retrieve Master-Project %s or GroupIDs for %s" % exercise, groupPattern
+    except(gitlab.exceptions.GitlabGetError, ValueError) as e:
+        print "Could not retrieve Master-Project %s or GroupIDs for %s" % (exercise, pattern)
+        return
     try:
         for id in groupIDs:
-            fork = masterProject.forks.create({'namespace_id': id})
+            group = gl.groups.get(id)
+            # by hand: curl --header "PRIVATE-TOKEN: aV4F1jNivUYVEqQ83YsZ" "https://gitlab.lrz.de/api/v3/projects/fork/4846?namespace=3585"
+            gl.projects.fork({'id': masterProject.id, 'namespace': group.name})
     except gitlab.exceptions.GitlabCreateError:
         print "Could not fork to groups"
 

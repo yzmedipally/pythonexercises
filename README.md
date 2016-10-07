@@ -38,7 +38,7 @@ Please consult example the [configuration file](https://gitlab.lrz.de/giteducate
 
 ## Installation & Requirements
 
-tba
+pip install -r requirements.txt
 
 ## Design
 

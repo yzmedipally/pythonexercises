@@ -57,10 +57,7 @@ def init_action(gl, config):
         pprint(e)
     print "Successfully created project with config-file"
 
-def publish_action(gl, reviewerString, pattern, exercise): 
-    raise NotImplementedError
-
-def dispatch_action(args, config):
+def dispatch(args, config):
     try:
         check_args(args)
     except ValueError as e:
@@ -76,8 +73,8 @@ def dispatch_action(args, config):
     elif action == "init":
         init_action(gl, config)
 
-    elif action == "publish": 
-        publish_action(gl)
+    elif action == "publish":
+        publish_exercise(gl, args.exercise, config["masterGroup"], config["pattern"])
 
     elif action == "add_reviewer":
         add_reviewer_to_exercise(
@@ -132,12 +129,12 @@ def main():
             config = json.load(config_file)
         config_file.close()
     except IOError as e:
-        print "I/O error({0}): {1}".format(e.errno, e.strerror)
+        print "Couldn't open {0}: I/O error({1}) - {2}".format(args.config_file, e.errno, e.strerror)
         sys.exit(1) 
     if not check_config(config):
         print "Config check failed"
         sys.exit(2)
-    dispatch_action(args, config)
+    dispatch(args, config)
 
 if __name__ == "__main__":
     main()
