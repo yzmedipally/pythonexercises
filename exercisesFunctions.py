@@ -111,7 +111,7 @@ def _get_commithash_of_original_exercise(gl, masterProject, downloadDir, exercis
         origin.pull()
     return repo.active_branch.commit
 
-def query_yes_no(question, default="yes"):
+def _query_yes_no(question, default="yes"):
     """Ask a yes/no question via raw_input() and return their answer.
 
     "question" is a string that is presented to the user.
@@ -145,8 +145,28 @@ def query_yes_no(question, default="yes"):
         else:
             sys.stdout.write("Please respond with 'yes' or 'no' "
                              "(or 'y' or 'n').\n")
+def _add_user_to_project(gl, userID, projectName, accessLevel, groupID): 
+    group = gl.groups.get(groupID)
+    if projectName in map(lambda x: x.name, group.projects.list()):
+        if len(group.projects.list(search = projectName)) > 1:
+            raise ValueError("Search for %s returns more than one project in %s" % \
+                (projectName, group.name))
+        projectInGroup = group.projects.list(search = projectName)[0]
+        project = gl.projects.get(projectInGroup.id)
+        if not userID in map(lambda x: x.id, project.members.list()):
+            project.members.create(
+                {
+                    'user_id': userID,
+                    'access_level': accessLevel 
+                }
+            )
+        # else: nothing to do
+    else:
+        raise ValueError("No project with name %s in group %s" % \
+            (projectName, group.name))
 
-# PUBLIy INTERFACE 
+################################################################################
+# PUBLIC INTERFACE 
 ################################################################################
 
 ########################################
@@ -232,26 +252,6 @@ def init_groups(gl, mapping, pattern, adminMails = []):
             except ValueError as e:
                 print str(e)
 
-def _add_user_to_project(gl, userID, projectName, accessLevel, groupID): 
-    group = gl.groups.get(groupID)
-    if projectName in map(lambda x: x.name, group.projects.list()):
-        if len(group.projects.list(search = projectName)) > 1:
-            raise ValueError("Search for %s returns more than one project in %s" % \
-                (projectName, group.name))
-        projectInGroup = group.projects.list(search = projectName)[0]
-        project = gl.projects.get(projectInGroup.id)
-        if not userID in map(lambda x: x.id, project.members.list()):
-            project.members.create(
-                {
-                    'user_id': userID,
-                    'access_level': accessLevel 
-                }
-            )
-        # else: nothing to do
-    else:
-        raise ValueError("No project with name %s in group %s" % \
-            (projectName, group.name))
-
 ########################################
 # workflow
 ########################################
@@ -332,10 +332,10 @@ def delete_groups(gl, pattern):
     if not len(pattern) > 4:
         print "The string pattern %s is smaller than four chars!" % pattern
         return False
-    if query_yes_no("Do you really want to delete all student's groups?", "no"): 
+    if _query_yes_no("Do you really want to delete all student's groups?", "no"): 
         for groupID in _get_group_ids_from_pattern(gl, pattern):
             print "Deleting Group with ID %s" % groupID
-#            gl.groups.delete(groupID)
+            gl.groups.delete(groupID)
         return True
     else:
         print "Aborting"
