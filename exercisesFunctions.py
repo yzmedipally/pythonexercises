@@ -287,10 +287,13 @@ def publish_exercise(gl, exercise, masterGroupName, pattern, config):
     try:
         for id in groupIDs:
             # by hand: curl --request POST --header "PRIVATE-TOKEN: <TOKEN>" "https://gitlab.lrz.de/api/v3/projects/fork/masterPoject.id?namespace=id"
+            group = gl.groups.get(id)
             fork_url = config["url"] + "/api/v3/projects/fork/%s?namespace=%s" % (masterProject.id, id)
+            # TODO Status-Code checken!
             r = requests.post(
                     fork_url,
                     headers={'PRIVATE-TOKEN' : config["token"]})
+            print "Published to group %s" % group.name
     except gitlab.exceptions.GitlabCreateError as e:
         pprint(e)
 
