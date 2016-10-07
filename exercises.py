@@ -57,9 +57,6 @@ def init_action(gl, config):
         pprint(e)
     print "Successfully created project with config-file"
 
-def publish_action(gl, pattern, exercise):
-    raise NotImplementedError
-
 def dispatch(args, config):
     try:
         check_args(args)
@@ -76,8 +73,8 @@ def dispatch(args, config):
     elif action == "init":
         init_action(gl, config)
 
-    elif action == "publish": 
-        publish_action(gl, config["pattern"], args.exercise)
+    elif action == "publish":
+        publish_exercise(gl, args.exercise, config["masterGroup"], config["pattern"])
 
     elif action == "add_reviewer":
         add_reviewer_to_exercise(
