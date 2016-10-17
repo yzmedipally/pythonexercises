@@ -91,28 +91,6 @@ def _add_students_to_group(gl, studentMailAdresses, groupID):
         studentIDs.append(_get_user_id_by_mail(gl, ma))
     _add_users_to_group(gl, studentIDs, groupID, gitlab.DEVELOPER_ACCESS) 
 
-def _get_last_solution(repo, branch, dueDate):
-    cur_solution = 0
-    for commit in repo.iter_commits(branch): 
-        if cur_solution == 0:
-            cur_solution = commit.hexsha 
-        if commit.committed_date <= dueDate and commit.committed_date > cur_solution:
-            cur_solution = commit.hexsha
-    return cur_solution
-
-def _get_commithash_of_original_exercise(gl, masterProject, downloadDir, exercise):
-    masterRepoPath = os.path.join(downloadDir, exercise, "master")
-    if not os.path.exists(masterRepoPath):
-        repo = Repo.clone_from(
-            masterProject.ssh_url_to_repo,
-            masterRepoPath,
-            branch='master')
-    else:
-        repo = Repo(masterRepoPath)
-        origin = repo.remotes.origin
-        origin.pull()
-    return repo.active_branch.commit
-
 def query_yes_no(question, default="yes"):
     """Ask a yes/no question via raw_input() and return their answer.
 
@@ -314,7 +292,6 @@ def download_solutions(gl, exercise, pattern, downloadDir, dueDate, masterGroupN
             os.makedirs(downloadDir)
     masterGroup = gl.groups.get(masterGroupName)
     masterProject = masterGroup.projects.list(search = exercise)[0]
-    originalHash = _get_commithash_of_original_exercise(gl, masterProject, downloadDir, exercise)
     for groupID in _get_group_ids_from_pattern(gl, pattern):
         group = gl.groups.get(groupID) 
         if exercise in map(lambda x: x.name, group.projects.list()): 
@@ -330,12 +307,7 @@ def download_solutions(gl, exercise, pattern, downloadDir, dueDate, masterGroupN
                     repo = Repo.clone_from(
                         project.ssh_url_to_repo,
                         curSolutionPath, 
-                        branch='master') 
-                solutionHash = _get_last_solution(repo, 'master', dueDate)
-                if solutionHash == originalHash:
-                    print "group %s does not have a solution (identical to master)!" % group.name
-                    shutil.rmtree(curSolutionPath)
-                    continue
+                        branch='master')
                 correct_branch = repo.create_head('correct_branch')
                 correct_branch.set_commit(solutionHash) 
                 print "Solution for group %s is available at %s" % (group.name, curSolutionPath) 
