@@ -35,6 +35,11 @@ def check_args(args):
             raise ValueError("Action %s needs param --reviewer!" % args.action)
 
 def check_action(gl, config):
+    if check_config_file(config):
+        print "Config check okay!"
+    else:
+        print "Config check failed!"
+        sys.exit(3)
     if check_users(gl, config["students"]):
         print "Users okay!"
     else:

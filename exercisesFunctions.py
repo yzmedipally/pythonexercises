@@ -152,6 +152,22 @@ def _add_user_to_project(gl, userID, projectName, accessLevel, groupID):
 ########################################
 # check
 ########################################
+
+def check_config_file(config):
+    requiredValues = [
+        "url",
+        "token",
+        "pattern",
+        "downloadDir",
+        "students",
+        "masterGroup"
+    ]
+    for requiredValue in requiredValues:
+        if not requiredValue in config.keys():
+            print "Config Error: %s has to be set!" % requiredValue
+            return False
+    return True
+
 def check_users(gl, mapping):
     usersOk = True
     for groupNr in mapping:
