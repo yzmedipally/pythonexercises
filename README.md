@@ -36,6 +36,19 @@ The original idea stemmed from a TUM course (IN 2085) and a related [github proj
 
 Please consult example the [configuration file](https://gitlab.lrz.de/giteducated/exercises/blob/master/example_config.json)
 
+Please be aware that empty exercise projects in your master project are not supported (you'll have
+to commit at least an exercise sheet).
+
+To use it you should make sure:
+* To have a free namespace (config-param pattern in your config.json)
+* To have a master group in which you administer the exercises to be published
+* To have an ssh-key for every account registered in gitlab that you want to use as instructor or reviewer (the according private key has to be installed on the machine used for the download action).
+
+As a general advice: If your notification settings in gitlab are not adapted accordingly and you
+plan to manage a big number of groups/students be prepared to get a lot of emails!
+Consider to implement some mail filtering if you do not wish to change your notification settings.
+Your inbox will be flooded.
+
 ## Installation & Requirements
 
 pip install -r requirements.txt

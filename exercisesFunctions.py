@@ -91,29 +91,7 @@ def _add_students_to_group(gl, studentMailAdresses, groupID):
         studentIDs.append(_get_user_id_by_mail(gl, ma))
     _add_users_to_group(gl, studentIDs, groupID, gitlab.DEVELOPER_ACCESS) 
 
-def _get_last_solution(repo, branch, dueDate):
-    cur_solution = 0
-    for commit in repo.iter_commits(branch): 
-        if cur_solution == 0:
-            cur_solution = commit.hexsha 
-        if commit.committed_date <= dueDate and commit.committed_date > cur_solution:
-            cur_solution = commit.hexsha
-    return cur_solution
-
-def _get_commithash_of_original_exercise(gl, masterProject, downloadDir, exercise):
-    masterRepoPath = os.path.join(downloadDir, exercise, "master")
-    if not os.path.exists(masterRepoPath):
-        repo = Repo.clone_from(
-            masterProject.ssh_url_to_repo,
-            masterRepoPath,
-            branch='master')
-    else:
-        repo = Repo(masterRepoPath)
-        origin = repo.remotes.origin
-        origin.pull()
-    return repo.active_branch.commit
-
-def _query_yes_no(question, default="yes"):
+def query_yes_no(question, default="yes"):
     """Ask a yes/no question via raw_input() and return their answer.
 
     "question" is a string that is presented to the user.
@@ -174,6 +152,22 @@ def _add_user_to_project(gl, userID, projectName, accessLevel, groupID):
 ########################################
 # check
 ########################################
+
+def check_config_file(config):
+    requiredValues = [
+        "url",
+        "token",
+        "pattern",
+        "downloadDir",
+        "students",
+        "masterGroup"
+    ]
+    for requiredValue in requiredValues:
+        if not requiredValue in config.keys():
+            print "Config Error: %s has to be set!" % requiredValue
+            return False
+    return True
+
 def check_users(gl, mapping):
     usersOk = True
     for groupNr in mapping:
@@ -269,6 +263,7 @@ def add_reviewer_to_exercise(gl, reviewerMails, pattern, exercise):
                     gitlab.REPORTER_ACCESS,
                     groupID
                 )
+                print "Added %s to %s" % (reviewerMail, groupID)
             except ValueError as e:
                 print "ERROR: Couldn't add %s (Error: %s)" % \
                     (reviewerMail, str(e))
@@ -276,24 +271,34 @@ def add_reviewer_to_exercise(gl, reviewerMails, pattern, exercise):
 def publish_exercise(gl, exercise, masterGroupName, pattern, config):
     try:
         masterGroup = gl.groups.get(masterGroupName)
-        if len (masterGroup.projects.list(search = exercise)) != 1:
-            raise ValueError("Exercise is not unambiguos!")
-        masterProjectID = masterGroup.projects.list(search = exercise)[0].id
+        masterProjectID = 0
+        for p in masterGroup.projects.list():
+            if p.name == exercise:
+                masterProjectID = p.id
+        if masterProjectID == 0:
+            raise ValueError("Exercise \"%s\" does not exist!" % exercise)
         masterProject = gl.projects.get(masterProjectID)
         groupIDs = _get_group_ids_from_pattern(gl, pattern)
     except(gitlab.exceptions.GitlabGetError, ValueError) as e:
-        print "Could not retrieve Master-Project %s or GroupIDs for %s" % (exercise, pattern)
+        print "Could not retrieve Master-Project %s or GroupIDs for %s: %s" % (exercise, pattern, str(e))
         return
     try:
         for id in groupIDs:
             # by hand: curl --request POST --header "PRIVATE-TOKEN: <TOKEN>" "https://gitlab.lrz.de/api/v3/projects/fork/masterPoject.id?namespace=id"
             group = gl.groups.get(id)
-            fork_url = config["url"] + "/api/v3/projects/fork/%s?namespace=%s" % (masterProject.id, id)
-            # TODO Status-Code checken!
-            r = requests.post(
+            # check whether the fork is already instantiated
+            forkit = True
+            for p in group.projects.list():
+                if p.name == exercise:
+                    print "group %s already forked, nothing to do." % group.name
+                    forkit = False
+            if forkit:
+                fork_url = config["url"] + "/api/v3/projects/fork/%s?namespace=%s" % (masterProject.id, id)
+                # TODO Status-Code checken!
+                r = requests.post(
                     fork_url,
                     headers={'PRIVATE-TOKEN' : config["token"]})
-            print "Published to group %s" % group.name
+                print "Published to group %s" % group.name
     except gitlab.exceptions.GitlabCreateError as e:
         pprint(e)
 
@@ -303,7 +308,6 @@ def download_solutions(gl, exercise, pattern, downloadDir, dueDate, masterGroupN
             os.makedirs(downloadDir)
     masterGroup = gl.groups.get(masterGroupName)
     masterProject = masterGroup.projects.list(search = exercise)[0]
-    originalHash = _get_commithash_of_original_exercise(gl, masterProject, downloadDir, exercise)
     for groupID in _get_group_ids_from_pattern(gl, pattern):
         group = gl.groups.get(groupID) 
         if exercise in map(lambda x: x.name, group.projects.list()): 
@@ -319,12 +323,7 @@ def download_solutions(gl, exercise, pattern, downloadDir, dueDate, masterGroupN
                     repo = Repo.clone_from(
                         project.ssh_url_to_repo,
                         curSolutionPath, 
-                        branch='master') 
-                solutionHash = _get_last_solution(repo, 'master', dueDate)
-                if solutionHash == originalHash:
-                    print "group %s does not have a solution (identical to master)!" % group.name
-                    shutil.rmtree(curSolutionPath)
-                    continue
+                        branch='master')
                 correct_branch = repo.create_head('correct_branch')
                 correct_branch.set_commit(solutionHash) 
                 print "Solution for group %s is available at %s" % (group.name, curSolutionPath) 
@@ -343,7 +342,7 @@ def delete_groups(gl, pattern):
     if not len(pattern) > 4:
         print "The string pattern %s is smaller than four chars!" % pattern
         return False
-    if _query_yes_no("Do you really want to delete all student's groups?", "no"): 
+    if query_yes_no("Do you really want to delete all student's groups?", "no"): 
         for groupID in _get_group_ids_from_pattern(gl, pattern):
             print "Deleting Group with ID %s" % groupID
             gl.groups.delete(groupID)
