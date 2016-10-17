@@ -57,7 +57,7 @@ def init_action(gl, config):
         pprint(e)
     print "Successfully created project with config-file"
 
-def dispatch(args, config):
+def dispatch(parser, args, config):
     try:
         check_args(args)
     except ValueError as e:
@@ -95,6 +95,9 @@ def dispatch(args, config):
         elif action == "delete":
             delete_groups(gl, config["pattern"])
 
+        elif action == "help":
+            parser.print_help()
+
         else:
             print "Action %s unknown (try --help)" % action
 
@@ -108,7 +111,7 @@ def main():
                             required = False, 
                             help = 'Path to config file')
     parser.add_argument(    '--action',
-                            default = 'check',
+                            default = 'help',
                             required = False,
                             help = """The action to be executed. Possible values:
                             check, init, publish, add_reviewer, download, delete""")
@@ -136,7 +139,7 @@ def main():
     if not check_config(config):
         print "Config check failed"
         sys.exit(2)
-    dispatch(args, config)
+    dispatch(parser, args, config)
 
 if __name__ == "__main__":
     main()
