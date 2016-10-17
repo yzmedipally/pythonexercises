@@ -292,7 +292,7 @@ def publish_exercise(gl, exercise, masterGroupName, pattern, config):
             forkit = True
             for p in group.projects.list():
                 if p.name == exercise:
-                    print "group %s already forked" % group.name
+                    print "group %s already forked, nothing to do." % group.name
                     forkit = False
             if forkit:
                 fork_url = config["url"] + "/api/v3/projects/fork/%s?namespace=%s" % (masterProject.id, id)
