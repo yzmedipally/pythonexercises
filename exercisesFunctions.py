@@ -113,7 +113,7 @@ def _get_commithash_of_original_exercise(gl, masterProject, downloadDir, exercis
         origin.pull()
     return repo.active_branch.commit
 
-def _query_yes_no(question, default="yes"):
+def query_yes_no(question, default="yes"):
     """Ask a yes/no question via raw_input() and return their answer.
 
     "question" is a string that is presented to the user.
@@ -350,7 +350,7 @@ def delete_groups(gl, pattern):
     if not len(pattern) > 4:
         print "The string pattern %s is smaller than four chars!" % pattern
         return False
-    if _query_yes_no("Do you really want to delete all student's groups?", "no"): 
+    if query_yes_no("Do you really want to delete all student's groups?", "no"): 
         for groupID in _get_group_ids_from_pattern(gl, pattern):
             print "Deleting Group with ID %s" % groupID
             gl.groups.delete(groupID)

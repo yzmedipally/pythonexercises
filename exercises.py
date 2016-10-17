@@ -2,6 +2,7 @@
 import argparse
 import json
 import sys
+import time
 from exercisesFunctions import *
 from pprint import pprint
 
@@ -24,7 +25,11 @@ def check_args(args):
             raise ValueError("Action %s needs param --exercise!" % args.action)
     if args.action == "download":
         if not "duedate" in args or args.duedate == None:
-            raise ValueError("Action %s needs param --duedate!" % args.action)
+            args.duedate = time.time()
+            if not query_yes_no(
+                    "You didn't specify a duedate, is it okay to assume now (%s)?" % str(args.duedate),
+                    "no"):
+                raise ValueError("Ok then, give us param --duedate then...")
     if args.action == "add_reviewer":
         if not "reviewer" in args or args.reviewer == None:
             raise ValueError("Action %s needs param --reviewer!" % args.action)
