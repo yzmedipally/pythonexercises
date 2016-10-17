@@ -269,6 +269,7 @@ def add_reviewer_to_exercise(gl, reviewerMails, pattern, exercise):
                     gitlab.REPORTER_ACCESS,
                     groupID
                 )
+                print "Added %s to %s" % (reviewerMail, groupID)
             except ValueError as e:
                 print "ERROR: Couldn't add %s (Error: %s)" % \
                     (reviewerMail, str(e))
@@ -276,13 +277,16 @@ def add_reviewer_to_exercise(gl, reviewerMails, pattern, exercise):
 def publish_exercise(gl, exercise, masterGroupName, pattern, config):
     try:
         masterGroup = gl.groups.get(masterGroupName)
-        if len (masterGroup.projects.list(search = exercise)) != 1:
-            raise ValueError("Exercise is not unambiguos!")
-        masterProjectID = masterGroup.projects.list(search = exercise)[0].id
+        masterProjectID = 0
+        for p in masterGroup.projects.list():
+            if p.name == exercise:
+                masterProjectID = p.id
+        if masterProjectID == 0:
+            raise ValueError("Exercise \"%s\" does not exist!" % exercise)
         masterProject = gl.projects.get(masterProjectID)
         groupIDs = _get_group_ids_from_pattern(gl, pattern)
     except(gitlab.exceptions.GitlabGetError, ValueError) as e:
-        print "Could not retrieve Master-Project %s or GroupIDs for %s" % (exercise, pattern)
+        print "Could not retrieve Master-Project %s or GroupIDs for %s: %s" % (exercise, pattern, str(e))
         return
     try:
         for id in groupIDs:
