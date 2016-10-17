@@ -66,38 +66,40 @@ def dispatch(args, config):
 
     gl = gitlab.Gitlab(config["url"], config["token"])
     action = args.action.lower()
+    try:
+        if   action == "check":
+            check_action(gl, config)
 
-    if   action == "check":
-        check_action(gl, config)
+        elif action == "init":
+            init_action(gl, config)
 
-    elif action == "init":
-        init_action(gl, config)
+        elif action == "publish":
+            publish_exercise(gl, args.exercise, config["masterGroup"], config["pattern"], config)
 
-    elif action == "publish":
-        publish_exercise(gl, args.exercise, config["masterGroup"], config["pattern"], config)
+        elif action == "add_reviewer":
+            add_reviewer_to_exercise(
+                gl,
+                args.reviewer.split(","),
+                config["pattern"],
+                args.exercise
+            )
 
-    elif action == "add_reviewer":
-        add_reviewer_to_exercise(
-            gl,
-            args.reviewer.split(","),
-            config["pattern"],
-            args.exercise
-        )
+        elif action == "download":
+            download_solutions(gl,
+                args.exercise,
+                config["pattern"],
+                config["downloadDir"],
+                args.duedate,
+                config["masterGroup"])
 
-    elif action == "download":
-        download_solutions(gl,
-            args.exercise,
-            config["pattern"],
-            config["downloadDir"],
-            args.duedate,
-            config["masterGroup"])
+        elif action == "delete":
+            delete_groups(gl, config["pattern"])
 
-    elif action == "delete":
-        delete_groups(gl, config["pattern"]) 
+        else:
+            print "Action %s unknown (try --help)" % action
 
-    else:
-        print "Action %s unknown (try --help)" % action
-
+    except gitlab.exceptions.GitlabAuthenticationError as e:
+        print "Wrong credentials, please recheck your config.json!: %s" % str(e)
 def main():
     parser = argparse.ArgumentParser(
             description = 'Exercises - Script to automate gitlab course handling.')
