@@ -1,9 +1,9 @@
 #!/bin/sh
 
 ls -l /opt/gitlab/bin/gitlab-ctl
-/opt/gitlab/bin/gitlab-ctl stop
-/opt/gitlab/bin/gitlab-ctl start
-/opt/gitlab/bin/gitlab-ctl status
+/opt/gitlab/bin/gitlab-ctl stop 2>&1
+/opt/gitlab/bin/gitlab-ctl start 2>&1
+/opt/gitlab/bin/gitlab-ctl status 2>&1
 
 
 URL='http://localhost'
