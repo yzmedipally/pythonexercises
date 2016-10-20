@@ -26,7 +26,7 @@ testcase() {
 }
 
 curl -I localhost/users/sign_in
-/opt/gitlab/bin/gitlab-ctl status
+/opt/gitlab/bin/gitlab-ctl start 
 apt-get install lsof -y
 lsof -i -U
 
