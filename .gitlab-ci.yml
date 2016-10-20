@@ -3,4 +3,5 @@ image: gitlab/gitlab-ce:latest
 all_tests:
     script:
     - apt-get update && apt-get upgrade -y
+    - apt-get install python -y
     - bash tests/functional_tests.sh
