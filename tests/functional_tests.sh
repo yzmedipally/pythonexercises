@@ -26,7 +26,9 @@ testcase() {
 }
 
 curl -I http://localhost
-curl -I https://localhost
+echo "Sleeping"
+sleep 100
+curl -I http://localhost
 
 ln -s tests/test_config1.json config.json
 testcase "exercises: default help" '
