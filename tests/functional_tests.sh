@@ -1,6 +1,6 @@
 #!/bin/sh
 
-tests/01_create_configfiles.sh
+./tests/01_create_configfiles.sh
 
 pecho() { printf %s\\n "$*"; }
 log() {
