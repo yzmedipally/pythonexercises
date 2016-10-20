@@ -26,7 +26,7 @@ testcase() {
 }
 
 ln -s test/test_config1.json config.json
-ls -l
+cat config.json
 testcase "exercises: default help" '
     OUTPUT=$(python exercises.py 2>&1) || exit 1
     pecho "${OUTPUT}" | grep -q "Exercises - Script to automate gitlab course handling."

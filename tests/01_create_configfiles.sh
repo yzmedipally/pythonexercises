@@ -76,4 +76,4 @@ cat > tests/test_config3.json << TESTJSON3
 TESTJSON3
 
 echo "Test-Configs set up:"
-ls -l test/*.json
+ls -l tests/*.json
