@@ -1,6 +1,11 @@
 #!/bin/sh
 
-/opt/gitlab/bin/gitlab-ctl restart
+ls -l /opt/gitlab/bin/gitlab-ctl
+/opt/gitlab/bin/gitlab-ctl stop
+/opt/gitlab/bin/gitlab-ctl start
+/opt/gitlab/bin/gitlab-ctl status
+
+
 URL='http://localhost'
 
 LOGIN='root'
