@@ -24,9 +24,11 @@ testcase() {
     OK
     printf ""
 }
-docker exec -it gitlab cat /etc/gitlab/gitlab.rb
+
+curl -I http://localhost
+curl -I https://localhost
+
 ln -s tests/test_config1.json config.json
-cat config.json
 testcase "exercises: default help" '
     OUTPUT=$(python exercises.py 2>&1) || exit 1
     pecho "${OUTPUT}" | grep -q "Exercises - Script to automate gitlab course handling."
@@ -38,7 +40,6 @@ testcase "exercises: help" '
 '
 
 mkdir -p /tmp/exercises_test/
-ln -sf tests/test_config2.json config.json
 testcase "gitlab: prepare users" '
     OUTPUT=$(python 02_create_users.py 2>&1) || exit 1
     pecho "${OUTPUT}" | grep -q "OK"

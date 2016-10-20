@@ -1,10 +1,7 @@
-image: python:2.7.12 
-
-services:
-    - gitlab/gitlab-ce:latest
+image: gitlab/gitlab-ce:latest
 
 all_tests:
     script:
-    - pwd
+    - apt-get install python2.7 pip-python curl
     - pip install -r requirements.txt
     - bash tests/functional_tests.sh
