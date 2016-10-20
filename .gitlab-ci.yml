@@ -1,9 +1,11 @@
-image: gitlab/gitlab-ce:latest
+image: python:2.7.12 
+
+service:
+    - gitlab/gitlab-ce:latest
 
 all_tests:
     script:
     - apt-get update && apt-get upgrade -y
-    - apt-get install python -y
     - apt-get install python-pip -y
     - pip install --upgrade pip 
     - pip install -r requirements.txt
