@@ -2,9 +2,7 @@ image: gitlab/gitlab-ce:latest
 
 all_tests:
     script:
-    - /opt/gitlab/bin/gitlab-ctl status
-    - /opt/gitlab/bin/gitlab-ctl stop 
-    - /opt/gitlab/bin/gitlab-ctl start
     - apt-get install python2.7 python-pip curl lsof -y
+    - /opt/gitlab/bin/gitlab-ctl status > /tmp/status && cat /tmp/status 2 &> 1
     - pip install -r requirements.txt
     - bash tests/functional_tests.sh
