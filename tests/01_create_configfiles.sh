@@ -1,5 +1,6 @@
 #!/bin/sh
 
+/opt/gitlab/bin/gitlab-ctl restart
 URL='http://localhost'
 
 LOGIN='root'
