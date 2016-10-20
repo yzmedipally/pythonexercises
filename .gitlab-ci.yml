@@ -4,7 +4,7 @@ all_tests:
     script:
     - apt-get update
     - apt-get install curl openssh-server ca-certificates -y
-    - curl -sS https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
+    - curl -sS https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | bash
     - apt-get install gitlab-ce
     - pip install -r requirements.txt
     - bash tests/functional_tests.sh
