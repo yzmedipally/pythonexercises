@@ -24,7 +24,7 @@ testcase() {
     OK
     printf ""
 }
-cat /etc/gitlab/gitlab.rb
+docker exec -it gitlab cat /etc/gitlab/gitlab.rb
 ln -s tests/test_config1.json config.json
 cat config.json
 testcase "exercises: default help" '
@@ -38,7 +38,7 @@ testcase "exercises: help" '
 '
 
 mkdir -p /tmp/exercises_test/
-
+ln -sf tests/test_config2.json config.json
 testcase "gitlab: prepare users" '
     OUTPUT=$(python 02_create_users.py 2>&1) || exit 1
     pecho "${OUTPUT}" | grep -q "OK"
