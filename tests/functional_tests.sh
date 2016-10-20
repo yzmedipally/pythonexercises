@@ -24,8 +24,8 @@ testcase() {
     OK
     printf ""
 }
-
-ln -s test/test_config1.json config.json
+cat /etc/gitlab/gitlab.rb
+ln -s tests/test_config1.json config.json
 cat config.json
 testcase "exercises: default help" '
     OUTPUT=$(python exercises.py 2>&1) || exit 1
