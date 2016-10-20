@@ -25,12 +25,13 @@ testcase() {
     printf ""
 }
 
-curl -I http://localhost
+curl -I localhost/users/sign_in
 /opt/gitlab/bin/gitlab-ctl status
-echo "Sleeping"
-sleep 100
-curl -I http://localhost
-/opt/gitlab/bin/gitlab-ctl status
+apt-get install lsof -y
+lsof -i -U
+
+
+
 
 ln -s tests/test_config1.json config.json
 testcase "exercises: default help" '
