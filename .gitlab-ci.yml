@@ -5,6 +5,6 @@ services:
 
 all_tests:
     script:
-    - apt-get install lsof && lsof -i tcp 
+    - pwd
     - pip install -r requirements.txt
     - bash tests/functional_tests.sh
