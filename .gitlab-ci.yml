@@ -1,4 +1,4 @@
-image: gitlab-ce:latest
+image: gitlab/gitlab-ce:latest
 
 all_tests:
     script:
