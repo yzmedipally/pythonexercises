@@ -3,7 +3,7 @@ image: gitlab/gitlab-ce:latest
 before_script:
     - apt-get update && apt-get upgrade -y
     - bash tests/configure_gitlab.sh
-    - apt-get install python2.7 python-pip -y
+    - apt-get install python2.7 python-pip netcat -y 
     - pip install -r requirements.txt
 
 all_tests:
