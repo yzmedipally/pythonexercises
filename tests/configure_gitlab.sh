@@ -1,9 +1,10 @@
 #!/bin/bash
 
+
 success=1
 while [ "$success" != "0" ]
 do
-	nc -z -v localhost 80
+	gitlab-ctl status | grep '^run'	
 	success=$?
 	if [ "$success" == "0" ]
 	then
