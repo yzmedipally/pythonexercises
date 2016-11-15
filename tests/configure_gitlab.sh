@@ -4,7 +4,7 @@
 success=1
 while [ "$success" != "0" ]
 do
-	gitlab-ctl status | grep '^run'	
+	curl -I localhost | grep 'HTTP/1.1 302 Found'	
 	success=$?
 	if [ "$success" == "0" ]
 	then
