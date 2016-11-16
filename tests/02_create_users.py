@@ -7,6 +7,10 @@ config_file = open("config.json", "r")
 config = json.load(config_file)
 config_file.close()
 
+with open(".TOKEN") as token_file:
+    config["token"] = token_file.readline().rstrip()
+token_file.close()
+
 gl = gitlab.Gitlab(config["url"], config["token"])
 
 #try:
