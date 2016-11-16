@@ -1,10 +1,11 @@
 #!/bin/sh 
 
 URL='http://localhost'
-
+echo "Fetching TOKEN"
 LOGIN='root'
 PASSWORD='anatamanarAI'
 TOKEN_JSON=$(curl -s ${URL}/api/v3/session -X POST --data "login=$LOGIN&password=$PASSWORD")
+echo "Token fetched:"
 echo $TOKEN_JSON
 TOKEN=$(echo "${TOKEN_JSON}" | python -c 'import sys, json; print(json.load(sys.stdin)["private_token"])')
 echo $TOKEN > .TOKEN
