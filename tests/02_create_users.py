@@ -3,7 +3,7 @@ import json
 import gitlab
 
 # read config file
-config_file = open("test/test_config1.json", "r")
+config_file = open("config.json", "r")
 config = json.load(config_file)
 config_file.close()
 
