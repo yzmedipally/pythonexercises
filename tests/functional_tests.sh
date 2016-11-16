@@ -18,7 +18,7 @@ OK() { printf "${GREEN}OK${NC}\\n"; }
 
 testcase() {
     testname=$1; shift
-    testscript=$1; shift
+    testscript=$2; shift
     printf %s "Testing ${testname}... "
     eval "${testscript}" || fatal "test failed"
     OK
@@ -88,7 +88,7 @@ testcase "exercises: action add reviewer" '
 '
 
 testcase "exercises: action download" '
-    OUTPUT=$(python exercises.py --config test_config2.json --action download --exercise testex1 --duedate 'date +%s' 2>&1) || exit 1
+    OUTPUT=$(python exercises.py --config test_config2.json --action download --exercise testex1 --duedate `date +%s` 2>&1) || exit 1
     pecho "${OUTPUT}" | grep -q "???"
 '
 
