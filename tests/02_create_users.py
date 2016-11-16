@@ -13,7 +13,7 @@ token_file.close()
 
 gl = gitlab.Gitlab(config["url"], config["token"])
 
-#try:
+try:
     # create test users in gitlab
     user = gl.users.create({'email': 'admin.test@tum.de', \
                         'password': 's3cur3s3cr3T', \
@@ -40,5 +40,5 @@ gl = gitlab.Gitlab(config["url"], config["token"])
                         'username': 'reviewer_test', \
                         'name': 'Reviewer Test'})
     print "OK"
-#except ValueError:
-#    print "ERROR: ", ValueError
+except ValueError:
+    print "ERROR: ", ValueError
