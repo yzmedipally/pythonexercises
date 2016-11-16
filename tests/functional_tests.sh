@@ -25,14 +25,6 @@ testcase() {
     printf ""
 }
 
-curl -I localhost/users/sign_in
-/opt/gitlab/bin/gitlab-ctl start 
-apt-get install lsof -y
-lsof -i -U 2>&1
-
-
-
-
 ln -s tests/test_config1.json config.json
 testcase "exercises: default help" '
     OUTPUT=$(python exercises.py 2>&1) || exit 1

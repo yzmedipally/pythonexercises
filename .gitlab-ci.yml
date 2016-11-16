@@ -2,10 +2,8 @@ image: gitlab/gitlab-ce:latest
 
 before_script:
     - apt-get update && apt-get upgrade -y
-    - apt-get install python2.7 python-pip -y
     - pip install -r requirements.txt
 
 all_tests:
     script:
-    - bash tests/configure_gitlab.sh
     - bash tests/functional_tests.sh

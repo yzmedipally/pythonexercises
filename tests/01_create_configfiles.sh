@@ -1,15 +1,9 @@
-#!/bin/sh
-
-ls -l /opt/gitlab/bin/gitlab-ctl
-/opt/gitlab/bin/gitlab-ctl stop 2>&1
-/opt/gitlab/bin/gitlab-ctl start 2>&1
-/opt/gitlab/bin/gitlab-ctl status 2>&1
-
+#!/bin/sh 
 
 URL='http://localhost'
 
 LOGIN='root'
-PASSWORD='5iveL!fe'
+PASSWORD='anatamanarAI'
 TOKEN_JSON=$(curl -s ${URL}/api/v3/session -X POST --data "login=$LOGIN&password=$PASSWORD")
 echo $TOKEN_JSON
 TOKEN=$(echo "${TOKEN_JSON}" | python -c 'import sys, json; print(json.load(sys.stdin)["private_token"])')
