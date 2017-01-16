@@ -49,6 +49,8 @@ plan to manage a big number of groups/students be prepared to get a lot of email
 Consider to implement some mail filtering if you do not wish to change your notification settings.
 Your inbox will be flooded.
 
+Solve repeated "Enter passphrase for" with ssh-add /Users/<username>/.ssh/id_rsa
+
 ## Installation & Requirements
 
 pip install -r requirements.txt
